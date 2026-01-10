@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学力検査用タイマー</title>
+    <title>Test Timer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 0にスラッシュが入らず、バランスの良いInterフォントをインポート */
@@ -109,7 +109,7 @@
 
     <!-- 設定パネル -->
     <div id="settingsModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
-        <div class="bg-slate-800 p-8 rounded-lg border border-slate-600 w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div class="bg-slate-800 p-8 rounded-lg border border-slate-600 w-full max-w-5xl max-h-[90vh] flex flex-col">
             <h2 class="text-2xl font-bold mb-4 text-center pb-4 border-b border-slate-700">詳細設定</h2>
             
             <div id="settingsContainer" class="flex-1 overflow-y-auto space-y-4 pr-2 text-slate-200">
@@ -117,7 +117,7 @@
                 <div class="bg-slate-700/60 p-4 rounded border border-emerald-500/30 mb-6 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-emerald-400">通知設定</h3>
-                        <p class="text-sm text-slate-400">次の部への移行時に、通知（「第◯部に進んでください」）を表示する</p>
+                        <p class="text-sm text-slate-400">次の部への移行時に、通知（「◯◯に進んでください」）を表示する</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-sm">通知を表示する</span>
@@ -197,15 +197,16 @@
     </audio>
 
     <script>
+        const defaultLabels = ["第1部", "第2部", "第3部", "第4部", "第5部"];
         const defaultData = [
-            { name: "国語", parts: [0, 0, 0, 0, 0] },
-            { name: "社会", parts: [0, 0, 0, 0, 0] },
-            { name: "算数", parts: [0, 0, 0, 0, 0] },
-            { name: "理科", parts: [0, 0, 0, 0, 0] },
-            { name: "外国語", parts: [0, 0, 0, 0, 0] }
+            { name: "国語", parts: [0, 0, 0, 0, 0], partLabels: [...defaultLabels] },
+            { name: "社会", parts: [0, 0, 0, 0, 0], partLabels: [...defaultLabels] },
+            { name: "算数", parts: [0, 0, 0, 0, 0], partLabels: [...defaultLabels] },
+            { name: "理科", parts: [0, 0, 0, 0, 0], partLabels: [...defaultLabels] },
+            { name: "外国語", parts: [0, 0, 0, 0, 0], partLabels: [...defaultLabels] }
         ];
 
-        let examData = JSON.parse(localStorage.getItem('exam_data_v2')) || defaultData;
+        let examData = JSON.parse(localStorage.getItem('exam_data_v3')) || defaultData;
         let autoNextNotify = JSON.parse(localStorage.getItem('exam_notify_settings')) ?? true;
 
         let currentSubjectIdx = 0;
@@ -244,11 +245,13 @@
 
         function renderPartTabs() {
             const currentParts = examData[currentSubjectIdx].parts;
+            const currentLabels = examData[currentSubjectIdx].partLabels || defaultLabels;
+            
             partTabs.innerHTML = currentParts.map((t, i) => {
                 if (i > 0 && t === 0) return '';
                 return `
                     <button onclick="selectPart(${i})" class="part-tab px-10 py-3 rounded-md border-2 border-slate-600 text-4xl font-bold transition ${i === currentPartIdx ? 'active' : 'text-slate-500 bg-black/20'}">
-                        第${i+1}部
+                        ${currentLabels[i]}
                     </button>
                 `;
             }).join('');
@@ -258,15 +261,17 @@
             notifyToggle.checked = autoNextNotify;
             subjectSettingsList.innerHTML = examData.map((s, i) => `
                 <div class="bg-slate-700/40 p-4 rounded border border-slate-600 text-left">
-                    <div class="flex items-center gap-4 mb-3">
+                    <div class="flex items-center gap-4 mb-4">
                         <span class="text-sm font-bold">教科名</span>
                         <input type="text" id="edit-name-${i}" value="${s.name}" class="bg-slate-900 border border-slate-500 rounded px-2 py-1 text-white flex-1">
                     </div>
-                    <div class="grid grid-cols-5 gap-2">
-                        ${s.parts.map((t, pi) => `
-                            <div>
-                                <label class="block text-[10px] text-slate-400 mb-1">第${pi+1}部</label>
-                                <input type="number" id="edit-time-${i}-${pi}" value="${t}" class="w-full bg-slate-900 border border-slate-500 rounded px-1 py-1 text-white text-center">
+                    <div class="grid grid-cols-5 gap-3">
+                        ${[0,1,2,3,4].map(pi => `
+                            <div class="space-y-1">
+                                <label class="block text-[10px] text-slate-400">名称</label>
+                                <input type="text" id="edit-label-${i}-${pi}" value="${s.partLabels ? s.partLabels[pi] : defaultLabels[pi]}" placeholder="${defaultLabels[pi]}" class="w-full bg-slate-900 border border-slate-500 rounded px-1 py-1 text-white text-[10px]">
+                                <label class="block text-[10px] text-slate-400">時間(分)</label>
+                                <input type="number" id="edit-time-${i}-${pi}" value="${s.parts[pi]}" class="w-full bg-slate-900 border border-slate-500 rounded px-1 py-1 text-white text-center font-bold">
                             </div>
                         `).join('')}
                     </div>
@@ -362,6 +367,7 @@
 
         function handlePartCompletion() {
             const currentParts = examData[currentSubjectIdx].parts;
+            const currentLabels = examData[currentSubjectIdx].partLabels || defaultLabels;
             let nextPartIdx = -1;
             for (let i = currentPartIdx + 1; i < currentParts.length; i++) {
                 if (currentParts[i] > 0) {
@@ -372,7 +378,7 @@
 
             if (nextPartIdx !== -1) {
                 if (autoNextNotify) {
-                    showToast(`第${nextPartIdx + 1}部に進んでください`, 8000);
+                    showToast(`${currentLabels[nextPartIdx]}に進んでください`, 8000);
                 }
                 
                 pauseTimer();
@@ -419,9 +425,10 @@
         function saveAndClose() {
             examData = examData.map((s, i) => ({
                 name: document.getElementById(`edit-name-${i}`).value,
-                parts: [0, 1, 2, 3, 4].map(pi => parseInt(document.getElementById(`edit-time-${i}-${pi}`).value) || 0)
+                parts: [0, 1, 2, 3, 4].map(pi => parseInt(document.getElementById(`edit-time-${i}-${pi}`).value) || 0),
+                partLabels: [0, 1, 2, 3, 4].map(pi => document.getElementById(`edit-label-${i}-${pi}`).value || defaultLabels[pi])
             }));
-            localStorage.setItem('exam_data_v2', JSON.stringify(examData));
+            localStorage.setItem('exam_data_v3', JSON.stringify(examData));
 
             autoNextNotify = notifyToggle.checked;
             localStorage.setItem('exam_notify_settings', JSON.stringify(autoNextNotify));
