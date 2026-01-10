@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学力検査用モニタータイマー</title>
+    <title>Test Timer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Noto+Sans+JP:wght@500;700&display=swap');
@@ -22,6 +22,13 @@
             color: #ffffff;
             line-height: 1;
             text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .total-timer-display {
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         #progressLine {
@@ -130,12 +137,19 @@
             <div id="settingsContainer" class="flex-1 overflow-y-auto space-y-4 pr-2 text-slate-200">
                 <!-- 通知の基本設定 -->
                 <div class="bg-slate-700/60 p-4 rounded border border-emerald-500/30 mb-6 flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-12">
                         <div>
                             <h3 class="font-bold text-emerald-400">通知表示設定</h3>
                             <div class="flex items-center gap-2 mt-1">
                                 <input type="number" id="edit-notify-duration" min="1" max="30" class="w-16 number-input text-center">
                                 <span class="text-sm">秒間表示する</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <h3 class="font-bold text-emerald-400">表示設定</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="checkbox" id="edit-show-total" class="custom-checkbox">
+                                <label for="edit-show-total" class="text-sm cursor-pointer">合計残り時間を表示する</label>
                             </div>
                         </div>
                     </div>
@@ -168,10 +182,18 @@
 
     <!-- メインタイマーエリア -->
     <div class="w-full flex flex-col items-center flex-1 justify-center px-4 relative">
-        <div class="text-center w-full z-10 mb-8">
+        <div class="text-center w-full z-10 mb-4">
             <div id="partTabs" class="flex justify-center gap-6"></div>
         </div>
+        
         <div class="relative flex flex-col items-center justify-center w-full max-w-7xl">
+            <!-- 合計時間表示：設定により表示・非表示を切り替え -->
+            <div id="totalTimeDisplay" class="total-timer-display flex flex-col items-center mb-[-2vw]">
+                <span class="text-[1vw] text-slate-500 uppercase tracking-widest font-bold">Total Remaining</span>
+                <span id="totalTimeValue" class="text-[5vw] leading-none">00:00</span>
+            </div>
+            
+            <!-- 現在の部のタイマー -->
             <div id="timeDisplay" class="text-[26vw] timer-display tracking-normal z-0">00:00</div>
         </div>
     </div>
@@ -198,7 +220,7 @@
         </div>
 
         <div class="flex justify-end items-center">
-            <span class="text-[10px] text-slate-600 font-medium tracking-tight select-none hover:text-slate-500 transition cursor-default">
+            <span class="text-[16px] text-slate-600 font-medium tracking-tight select-none hover:text-slate-500 transition cursor-default">
                 © 2026 Takayuki WAYAMA. All rights reserved.
             </span>
         </div>
@@ -219,8 +241,9 @@
             { name: "外国語", parts: [0, 0, 0, 0, 0], partLabels: [...defaultLabels], partNotifies: defaultLabels.map(l => l + defaultNotifyText), partNotifyStates: [false, false, false, false, false] }
         ];
 
-        let examData = JSON.parse(localStorage.getItem('exam_data_v9')) || defaultData;
+        let examData = JSON.parse(localStorage.getItem('exam_data_v10')) || defaultData;
         let notifyDuration = JSON.parse(localStorage.getItem('exam_notify_duration')) ?? 5;
+        let showTotalTime = JSON.parse(localStorage.getItem('exam_show_total')) ?? true;
 
         let currentSubjectIdx = 0;
         let currentPartIdx = 0;
@@ -235,17 +258,25 @@
         const partTabs = document.getElementById('partTabs');
         const displaySubject = document.getElementById('displaySubject');
         const timeDisplay = document.getElementById('timeDisplay');
+        const totalTimeValue = document.getElementById('totalTimeValue');
+        const totalTimeDisplay = document.getElementById('totalTimeDisplay');
         const progressLine = document.getElementById('progressLine');
         const toggleBtn = document.getElementById('toggleBtn');
         const chime = document.getElementById('chime');
         const subjectSettingsList = document.getElementById('subjectSettingsList');
         const autoNextToast = document.getElementById('autoNextToast');
         const notifyDurInput = document.getElementById('edit-notify-duration');
+        const showTotalCheck = document.getElementById('edit-show-total');
 
         function init() {
             renderSubjectTabs();
             renderSettings();
             updateExamDisplay();
+            applyDisplaySettings();
+        }
+
+        function applyDisplaySettings() {
+            totalTimeDisplay.style.display = showTotalTime ? 'flex' : 'none';
         }
 
         function renderSubjectTabs() {
@@ -296,6 +327,7 @@
 
         function renderSettings() {
             notifyDurInput.value = notifyDuration;
+            showTotalCheck.checked = showTotalTime;
             
             subjectSettingsList.innerHTML = examData.map((s, i) => `
                 <div class="bg-slate-700/40 p-4 rounded border border-slate-600 text-left">
@@ -372,15 +404,29 @@
             }
         }
 
-        function renderTime() {
-            const isNegative = timeLeft < 0;
-            const absSecs = Math.abs(timeLeft);
+        function formatTime(seconds) {
+            const isNegative = seconds < 0;
+            const absSecs = Math.abs(seconds);
             const mins = Math.floor(absSecs / 60);
             const secs = absSecs % 60;
             const sign = isNegative ? "-" : "";
+            return `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function renderTime() {
+            const subject = examData[currentSubjectIdx];
             
-            timeDisplay.innerText = `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            // 各部のタイマー表示
+            timeDisplay.innerText = formatTime(timeLeft);
             
+            // 全体の残り時間計算 (現在の部から最後までの合計)
+            let overallRemaining = Math.max(0, timeLeft);
+            for (let i = currentPartIdx + 1; i < subject.parts.length; i++) {
+                overallRemaining += (subject.parts[i] || 0) * 60;
+            }
+            totalTimeValue.innerText = formatTime(overallRemaining);
+            
+            // プログレスバーの更新
             if (totalTime > 0) {
                 const percentage = (Math.max(0, timeLeft) / totalTime) * 100;
                 progressLine.style.width = `${percentage}%`;
@@ -496,13 +542,17 @@
                     return document.getElementById(`edit-notify-state-${i}-${pi}`).checked;
                 })
             }));
-            localStorage.setItem('exam_data_v9', JSON.stringify(examData));
+            localStorage.setItem('exam_data_v10', JSON.stringify(examData));
 
             notifyDuration = parseInt(notifyDurInput.value) || 5;
             localStorage.setItem('exam_notify_duration', JSON.stringify(notifyDuration));
 
+            showTotalTime = showTotalCheck.checked;
+            localStorage.setItem('exam_show_total', JSON.stringify(showTotalTime));
+
             document.getElementById('settingsModal').classList.add('hidden');
             renderSubjectTabs();
+            applyDisplaySettings();
             resetTimer();
         }
 
