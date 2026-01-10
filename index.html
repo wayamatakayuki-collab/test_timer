@@ -1,0 +1,456 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="ja"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;学力検査用モニタータイマー&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 0にスラッシュが入らず、バランスの良いInterフォントをインポート */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&amp;family=Noto+Sans+JP:wght@500;700&amp;display=swap');</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Noto Sans JP', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #1a2e26;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #e2e8f0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.timer-display {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Inter', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-variant-numeric: tabular-nums;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 700;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 0 4px 12px rgba(0,0,0,0.4);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 横型進捗バーのアニメーション */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#progressLine {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: width 1s linear, background-color 0.5s ease;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes blink {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>0%, 100% { opacity: 1; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>50% { opacity: 0.4; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.blinking {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: blink 1.5s linear infinite;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #ff9999;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.subject-tab {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 6px solid transparent;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.subject-tab.active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-color: #ffd700;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.part-tab.active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #1a2e26;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-color: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 通知（トースト）の配置とスタイル */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#autoNextToast {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* 中央配置と初期アニメーション状態 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translate(-50%, -50%) scale(0.8);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 40px 100px rgba(0,0,0,0.9);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 85vw; /* 画面幅の85%に調整 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1400px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#autoNextToast.visible {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translate(-50%, -50%) scale(1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-panel {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(0, 0, 0, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-top: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 進捗バーのコンテナ装飾 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.progress-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(255, 255, 255, 0.05);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-top: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 1px solid rgba(255, 255, 255, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* バーの目盛り（グリッド） */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.progress-grid {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-image: linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-size: 10% 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 1;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* カスタムチェックボックスのスタイル */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.custom-checkbox {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>accent-color: #10b981;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="h-screen flex flex-col items-center justify-between relative"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 設定パネル --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="settingsModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-slate-800 p-8 rounded-lg border border-slate-600 w-full max-w-4xl max-h-[90vh] flex flex-col"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold mb-4 text-center pb-4 border-b border-slate-700"&gt;詳細設定&lt;/h2&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="settingsContainer" class="flex-1 overflow-y-auto space-y-4 pr-2 text-slate-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 全体設定（通知ON/OFF） --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="bg-slate-700/60 p-4 rounded border border-emerald-500/30 mb-6 flex items-center justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3 class="font-bold text-emerald-400"&gt;システム設定&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p class="text-sm text-slate-400"&gt;次の部へ切り替わる際の通知表示を制御します。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="text-sm"&gt;通知を表示する&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="checkbox" id="edit-notify-toggle" class="custom-checkbox"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- 各教科設定がここに入る --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="subjectSettingsList" class="space-y-4"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="mt-6 flex gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="saveAndClose()" class="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 rounded transition"&gt;設定を保存して閉じる&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 通知（最適化サイズ：タイマーより一回り小さく視認性を維持） --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="autoNextToast" class="fixed top-1/2 left-1/2 bg-black/95 text-white px-10 py-12 rounded-3xl font-bold text-[7.5vw] opacity-0 z-50 border-8 border-emerald-500 text-center whitespace-nowrap leading-none flex items-center justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>第2部に進んでください</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 左上に教科名を表示 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="absolute top-32 left-10 z-20"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1 id="displaySubject" class="text-[4.5vw] font-bold text-slate-300 tracking-wider leading-none border-l-8 border-emerald-500 pl-4"&gt;---&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 上部：教科選択タブ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="subjectTabs" class="w-full flex justify-center gap-2 bg-black/10"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 中央：メインタイマー --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="w-full flex flex-col items-center flex-1 justify-center px-4 relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="text-center w-full z-10 mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 第◯部タブ --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="partTabs" class="flex justify-center gap-6"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="relative flex flex-col items-center justify-center w-full max-w-7xl"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- 時間表示 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="timeDisplay" class="text-[26vw] timer-display tracking-normal z-0"&gt;00:00&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 進捗バー --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="progress-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="progress-grid"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="progressLine" class="h-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.6)] relative z-10 rounded-r-full" style="width: 100%;"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 下部：操作エリア --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="w-full control-panel py-4 px-10 flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick="resetTimer()" class="text-slate-500 hover:text-white transition" title="リセット"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="toggleBtn" onclick="toggleTimer()" class="bg-white/5 hover:bg-white/10 border border-white/20 px-10 py-2 rounded text-lg font-bold transition text-slate-400"&gt;START&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- クレジット表記 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span class="text-[10px] text-slate-600 font-medium tracking-tight select-none hover:text-slate-500 transition cursor-default"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>© 2026 Takayuki WAYAMA. All rights reserved.</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick="openSettings()" class="text-slate-500 hover:text-white transition" title="設定"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"&gt;&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z" /&gt;&lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- チャイム音 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;audio id="chime" preload="auto"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/audio&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const defaultData = [</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "国語", parts: [45, 0, 0, 0, 0] },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "社会", parts: [40, 0, 0, 0, 0] },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "算数", parts: [45, 0, 0, 0, 0] },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "理科", parts: [40, 0, 0, 0, 0] },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "外国語", parts: [10, 20, 0, 0, 0] }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>let examData = JSON.parse(localStorage.getItem('exam_data_v2')) || defaultData;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let autoNextNotify = JSON.parse(localStorage.getItem('exam_notify_settings')) ?? true;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentSubjectIdx = 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentPartIdx = 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let timeLeft = 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let totalTime = 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let timerId = null;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let isRunning = false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let audioUnlocked = false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let toastTimeout = null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const subjectTabs = document.getElementById('subjectTabs');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const partTabs = document.getElementById('partTabs');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const displaySubject = document.getElementById('displaySubject');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const timeDisplay = document.getElementById('timeDisplay');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const progressLine = document.getElementById('progressLine');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const toggleBtn = document.getElementById('toggleBtn');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const chime = document.getElementById('chime');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const subjectSettingsList = document.getElementById('subjectSettingsList');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const autoNextToast = document.getElementById('autoNextToast');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const notifyToggle = document.getElementById('edit-notify-toggle');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function init() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderSubjectTabs();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderSettings();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateExamDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderSubjectTabs() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>subjectTabs.innerHTML = examData.map((s, i) =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="selectSubject(${i})" class="subject-tab px-8 py-6 font-bold transition text-slate-500 text-3xl ${i === currentSubjectIdx ? 'active' : 'hover:text-slate-300'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>${s.name}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderPartTabs() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const currentParts = examData[currentSubjectIdx].parts;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>partTabs.innerHTML = currentParts.map((t, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (i &gt; 0 &amp;&amp; t === 0) return '';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return `</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onclick="selectPart(${i})" class="part-tab px-10 py-3 rounded-md border-2 border-slate-600 text-4xl font-bold transition ${i === currentPartIdx ? 'active' : 'text-slate-500 bg-black/20'}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>第${i+1}部</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}).join('');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderSettings() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>notifyToggle.checked = autoNextNotify;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>subjectSettingsList.innerHTML = examData.map((s, i) =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="bg-slate-700/40 p-4 rounded border border-slate-600 text-left"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="flex items-center gap-4 mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="text-sm font-bold"&gt;教科名&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="edit-name-${i}" value="${s.name}" class="bg-slate-900 border border-slate-500 rounded px-2 py-1 text-white flex-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-5 gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>${s.parts.map((t, pi) =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;label class="block text-[10px] text-slate-400 mb-1"&gt;第${pi+1}部&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input type="number" id="edit-time-${i}-${pi}" value="${t}" class="w-full bg-slate-900 border border-slate-500 rounded px-1 py-1 text-white text-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function selectSubject(idx) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentSubjectIdx = idx;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentPartIdx = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>hideToast();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderSubjectTabs();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>resetTimer();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function selectPart(idx) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>currentPartIdx = idx;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>hideToast();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>resetTimer();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function updateExamDisplay() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const subject = examData[currentSubjectIdx];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>displaySubject.innerText = subject.name;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderPartTabs();</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!isRunning) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>timeLeft = (subject.parts[currentPartIdx] || 0) * 60;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>totalTime = timeLeft;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderTime();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderTime() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const isNegative = timeLeft &lt; 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const absSecs = Math.abs(timeLeft);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const mins = Math.floor(absSecs / 60);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const secs = absSecs % 60;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const sign = isNegative ? "-" : "";</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>timeDisplay.innerText = `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (totalTime &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const percentage = (Math.max(0, timeLeft) / totalTime) * 100;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>progressLine.style.width = `${percentage}%`;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (timeLeft &lt; 60 &amp;&amp; timeLeft &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>progressLine.className = "h-full bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.6)] relative z-10 rounded-r-full";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (timeLeft &lt;= 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>progressLine.className = "h-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] relative z-10 rounded-r-full";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>progressLine.className = "h-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.6)] relative z-10 rounded-r-full";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>progressLine.style.width = '0%';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (timeLeft &lt;= 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>timeDisplay.classList.add('blinking');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>timeDisplay.classList.remove('blinking');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function toggleTimer() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!audioUnlocked) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chime.play().then(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>chime.pause();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>chime.currentTime = 0;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>audioUnlocked = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}).catch(e =&gt; console.log("Audio unlock failed:", e));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (isRunning) pauseTimer();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>else startTimer();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function startTimer() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (timeLeft &lt;= 0 &amp;&amp; !isRunning) return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>isRunning = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>toggleBtn.innerText = "PAUSE";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>toggleBtn.style.color = "#ffffff";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>timerId = setInterval(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>timeLeft--;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderTime();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (timeLeft === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>handlePartCompletion();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function handlePartCompletion() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const currentParts = examData[currentSubjectIdx].parts;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let nextPartIdx = -1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = currentPartIdx + 1; i &lt; currentParts.length; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentParts[i] &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>nextPartIdx = i;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (nextPartIdx !== -1) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (autoNextNotify) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showToast(`第${nextPartIdx + 1}部に進んでください`, 8000);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>pauseTimer();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentPartIdx = nextPartIdx;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>updateExamDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>startTimer();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chime.play().catch(e =&gt; console.log("Chime failed:", e));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>pauseTimer();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function showToast(message, duration) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (toastTimeout) clearTimeout(toastTimeout);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>autoNextToast.innerText = message;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>autoNextToast.classList.add('visible');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>toastTimeout = setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>autoNextToast.classList.remove('visible');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}, duration);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function hideToast() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (toastTimeout) clearTimeout(toastTimeout);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>autoNextToast.classList.remove('visible');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function pauseTimer() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>isRunning = false;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>clearInterval(timerId);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>toggleBtn.innerText = "START";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>toggleBtn.style.color = "";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function resetTimer() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pauseTimer();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateExamDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function openSettings() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderSettings();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('settingsModal').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function saveAndClose() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>examData = examData.map((s, i) =&gt; ({</p>
+<p class="p1"><span class="Apple-converted-space">                </span>name: document.getElementById(`edit-name-${i}`).value,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>parts: [0, 1, 2, 3, 4].map(pi =&gt; parseInt(document.getElementById(`edit-time-${i}-${pi}`).value) || 0)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>localStorage.setItem('exam_data_v2', JSON.stringify(examData));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>autoNextNotify = notifyToggle.checked;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>localStorage.setItem('exam_notify_settings', JSON.stringify(autoNextNotify));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('settingsModal').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderSubjectTabs();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>resetTimer();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>window.addEventListener('keydown', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (e.code === 'Space' &amp;&amp; document.activeElement.tagName !== 'INPUT') {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>toggleTimer();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>init();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
